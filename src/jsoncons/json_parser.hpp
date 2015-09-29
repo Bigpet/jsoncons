@@ -246,22 +246,6 @@ public:
                 next_symbol = input_symbols[next_char];
             }
             ++column_;
-            switch (next_symbol)
-            {
-            case symbols::control_char:
-                state_ = state::error;
-                err_handler_->error(std::error_code(json_parser_errc::illegal_control_character, json_parser_category()), *this);
-                break;
-            case symbols::cr:
-                ++line_, column_ = 1;
-                break;
-            case symbols::lf:
-                if (prev_char_ != '\r')
-                {
-                    ++line_, column_ = 1;
-                }
-                break;
-            }
 
             switch (state_)
             {
@@ -269,7 +253,17 @@ public:
                 {
                     switch (next_symbol)
                     {
-                    case symbols::space:case symbols::lf:case symbols::cr:case symbols::tab:
+                    case symbols::control_char:
+                        state_ = state::error;
+                        err_handler_->error(std::error_code(json_parser_errc::illegal_control_character, json_parser_category()), *this);
+                        break;
+                    case symbols::cr:
+                        ++line_, column_ = 1;
+                        break;
+                    case symbols::lf:
+                        if (prev_char_ != '\r'){++line_, column_ = 1;}
+                        break;
+                    case symbols::space:case symbols::tab:
                         break; 
                     case symbols::lbrace:
                         handler_->begin_json();
@@ -315,7 +309,17 @@ public:
                 {
                     switch (next_symbol)
                     {
-                    case symbols::space:case symbols::lf:case symbols::cr:case symbols::tab:
+                    case symbols::control_char:
+                        state_ = state::error;
+                        err_handler_->error(std::error_code(json_parser_errc::illegal_control_character, json_parser_category()), *this);
+                        break;
+                    case symbols::cr:
+                        ++line_, column_ = 1;
+                        break;
+                    case symbols::lf:
+                        if (prev_char_ != '\r'){++line_, column_ = 1;}
+                        break;
+                    case symbols::space:case symbols::tab:
                         break; 
                     case symbols::rbrace:
                         if (!pop(mode::object_member_value))
@@ -369,7 +373,17 @@ public:
                 {
                     switch (next_symbol)
                     {
-                    case symbols::space:case symbols::lf:case symbols::cr:case symbols::tab:
+                    case symbols::control_char:
+                        state_ = state::error;
+                        err_handler_->error(std::error_code(json_parser_errc::illegal_control_character, json_parser_category()), *this);
+                        break;
+                    case symbols::cr:
+                        ++line_, column_ = 1;
+                        break;
+                    case symbols::lf:
+                        if (prev_char_ != '\r'){++line_, column_ = 1;}
+                        break;
+                    case symbols::space:case symbols::tab:
                         break;
                     case symbols::rbrace:
                         if (!pop(mode::object_member_name))
@@ -410,7 +424,17 @@ public:
                 {
                     switch (next_symbol)
                     {
-                    case symbols::space:case symbols::lf:case symbols::cr:case symbols::tab:
+                    case symbols::control_char:
+                        state_ = state::error;
+                        err_handler_->error(std::error_code(json_parser_errc::illegal_control_character, json_parser_category()), *this);
+                        break;
+                    case symbols::cr:
+                        ++line_, column_ = 1;
+                        break;
+                    case symbols::lf:
+                        if (prev_char_ != '\r'){++line_, column_ = 1;}
+                        break;
+                    case symbols::space:case symbols::tab:
                         break;
                     case symbols::quote:
                         state_ = state::string;
@@ -438,7 +462,17 @@ public:
                 {
                     switch (next_symbol)
                     {
-                    case symbols::space:case symbols::lf:case symbols::cr:case symbols::tab:
+                    case symbols::control_char:
+                        state_ = state::error;
+                        err_handler_->error(std::error_code(json_parser_errc::illegal_control_character, json_parser_category()), *this);
+                        break;
+                    case symbols::cr:
+                        ++line_, column_ = 1;
+                        break;
+                    case symbols::lf:
+                        if (prev_char_ != '\r'){++line_, column_ = 1;}
+                        break;
+                    case symbols::space:case symbols::tab:
                         break;
                     case symbols::colon:
                         begin_member_value();
@@ -459,7 +493,17 @@ public:
                 {
                     switch (next_symbol)
                     {
-                    case symbols::space:case symbols::lf:case symbols::cr:case symbols::tab:
+                    case symbols::control_char:
+                        state_ = state::error;
+                        err_handler_->error(std::error_code(json_parser_errc::illegal_control_character, json_parser_category()), *this);
+                        break;
+                    case symbols::cr:
+                        ++line_, column_ = 1;
+                        break;
+                    case symbols::lf:
+                        if (prev_char_ != '\r'){++line_, column_ = 1;}
+                        break;
+                    case symbols::space:case symbols::tab:
                         break;
                     case symbols::lbrace:
                         if (!push(mode::object_member_name))
@@ -564,7 +608,17 @@ public:
                 {
                     switch (next_symbol)
                     {
-                    case symbols::space:case symbols::lf:case symbols::cr:case symbols::tab:
+                    case symbols::control_char:
+                        state_ = state::error;
+                        err_handler_->error(std::error_code(json_parser_errc::illegal_control_character, json_parser_category()), *this);
+                        break;
+                    case symbols::cr:
+                        ++line_, column_ = 1;
+                        break;
+                    case symbols::lf:
+                        if (prev_char_ != '\r'){++line_, column_ = 1;}
+                        break;
+                    case symbols::space:case symbols::tab:
                         break;
                     case symbols::lbrace:
                         if (!push(mode::object_member_name))
@@ -674,8 +728,18 @@ public:
                 {
                     switch (next_symbol)
                     {
-                    case symbols::lf:
+                    case symbols::control_char:
+                        state_ = state::error;
+                        err_handler_->error(std::error_code(json_parser_errc::illegal_control_character, json_parser_category()), *this);
+                        break;
                     case symbols::cr:
+                        ++line_, column_ = 1;
+                        err_handler_->error(std::error_code(json_parser_errc::illegal_character_in_string, json_parser_category()), *this);
+                        break;
+                    case symbols::lf:
+                        if (prev_char_ != '\r'){++line_, column_ = 1;}
+                        err_handler_->error(std::error_code(json_parser_errc::illegal_character_in_string, json_parser_category()), *this);
+                        break;
                     case symbols::tab:
                         state_ = state::error;
                         err_handler_->error(std::error_code(json_parser_errc::illegal_character_in_string, json_parser_category()), *this);
@@ -1241,6 +1305,10 @@ public:
                 {
                     switch (next_symbol)
                     {
+                    case symbols::control_char:
+                        state_ = state::error;
+                        err_handler_->error(std::error_code(json_parser_errc::illegal_control_character, json_parser_category()), *this);
+                        break;
                     case symbols::star:
                         state_ = state::slash_star;
                         break;
@@ -1258,6 +1326,16 @@ public:
                 {
                     switch (next_symbol)
                     {
+                    case symbols::control_char:
+                        state_ = state::error;
+                        err_handler_->error(std::error_code(json_parser_errc::illegal_control_character, json_parser_category()), *this);
+                        break;
+                    case symbols::cr:
+                        ++line_, column_ = 1;
+                        break;
+                    case symbols::lf:
+                        if (prev_char_ != '\r'){++line_, column_ = 1;}
+                        break;
                     case symbols::star:
                         state_ = state::slash_star_star;
                         break;
@@ -1268,8 +1346,16 @@ public:
                 {
                     switch (next_symbol)
                     {
-                    case symbols::lf:
+                    case symbols::control_char:
+                        state_ = state::error;
+                        err_handler_->error(std::error_code(json_parser_errc::illegal_control_character, json_parser_category()), *this);
+                        break;
                     case symbols::cr:
+                        ++line_, column_ = 1;
+                        state_ = saved_state_;
+                        break;
+                    case symbols::lf:
+                        if (prev_char_ != '\r'){++line_, column_ = 1;}
                         state_ = saved_state_;
                         break;
                     }
