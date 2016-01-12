@@ -87,7 +87,7 @@ is &gt;&gt; books;
 
 <p>Loop through the book array elements, using either a range-based for loop</p>
 
-<pre><code>for (auto book; books.elements())
+<pre><code>for (auto book: books.elements())
 {
     std::string author = book["author"].as&lt;std::string&gt;();
     std::string title = book["title"].as&lt;std::string&gt;();
