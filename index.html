@@ -56,7 +56,7 @@ using jsoncons::json_deserializer;
 <h3>
 <a id="reading-json-text-from-a-file" class="anchor" href="#reading-json-text-from-a-file" aria-hidden="true"><span class="octicon octicon-link"></span></a>Reading JSON text from a file</h3>
 
-<p>Here is a sample file (books.json):</p>
+<p>Here is a sample file, <code>books.json</code>:</p>
 
 <pre><code>[
     {
@@ -76,44 +76,61 @@ using jsoncons::json_deserializer;
 ]
 </code></pre>
 
-<p>You can read the JSON text into a <code>json</code> value like this</p>
+<p>It consists of an array of book elements, each element is an object with members title, author, and price.</p>
 
-<pre><code>json books = json::parse_file("books.json");
+<p>Read the JSON text into a <code>json</code> value,</p>
+
+<pre><code>std::ifstream is("books.json");
+json books;
+is &gt;&gt; books;
 </code></pre>
 
-<p>You can then loop through the books</p>
+<p>Loop through the book array elements, using either a range-based for loop</p>
+
+<pre><code>for (auto book; books.elements())
+{
+    std::string author = book["author"].as&lt;std::string&gt;();
+    std::string title = book["title"].as&lt;std::string&gt;();
+    std::cout &lt;&lt; author &lt;&lt; ", " &lt;&lt; title &lt;&lt; std::endl;
+}
+</code></pre>
+
+<p>or a traditional for loop</p>
 
 <pre><code>for (size_t i = 0; i &lt; books.size(); ++i)
 {
-    try
-    {
-        json&amp; book = books[i];
-        std::string author = book["author"].as&lt;std::string&gt;();
-        std::string title = book["title"].as&lt;std::string&gt;();
-        double price = book["price"].as&lt;double&gt;();
-        std::cout &lt;&lt; author &lt;&lt; ", " &lt;&lt; title &lt;&lt; ", " &lt;&lt; price &lt;&lt; std::endl;
-    }
-    catch (const json_exception&amp; e)
-    {
-        std::cerr &lt;&lt; e.what() &lt;&lt; std::endl;
-    }
+    json&amp; book = books[i];
+    std::string author = book["author"].as&lt;std::string&gt;();
+    std::string title = book["title"].as&lt;std::string&gt;();
+    std::cout &lt;&lt; author &lt;&lt; ", " &lt;&lt; title &lt;&lt; std::endl;
 }
+</code></pre>
+
+<p>or begin-end iterators</p>
+
+<pre><code>for (auto it = books.elements().begin(); 
+     it != books.elements().end();
+     ++it)
+{
+    std::string author = (*it)["author"].as&lt;std::string&gt;();
+    std::string title = (*it)["title"].as&lt;std::string&gt;();
+    std::cout &lt;&lt; author &lt;&lt; ", " &lt;&lt; title &lt;&lt; std::endl;
+} 
 </code></pre>
 
 <p>The output is</p>
 
-<pre><code>Haruki Murakami, Kafka on the Shore, 25.17
-Charles Bukowski, Women: A Novel, 12
-Member price not found.
+<pre><code>Haruki Murakami, Kafka on the Shore
+Charles Bukowski, Women: A Novel
+Ivan Passer, Cutter's Way
 </code></pre>
 
-<p>Note that the third book is missing a price, which causes an exception to be thrown.</p>
+<p>Note that the third book, Cutter's Way, is missing a price.</p>
 
-<p>You have a choice of accessors:</p>
+<p>You have a choice of object member accessors:</p>
 
-<pre><code>book["price"] will throw if there is no price
-book.get("price") will return a json null value if there is no price
-book.get("price",default_value) will return default_value if there is no price
+<pre><code>book["price"] will throw a `json_exception` if there is no price
+book.get("price",default_value) will return `default_value` if there is no price
 </code></pre>
 
 <p>So if you want to show "n/a" for the missing price, you can use this accessor</p>
@@ -121,16 +138,9 @@ book.get("price",default_value) will return default_value if there is no price
 <pre><code>std::string price = book.get("price","n/a").as&lt;std::string&gt;();
 </code></pre>
 
-<p>and the output becomes</p>
+<p>Or you can check if book has a member "price" with the method <code>count</code>, and output accordingly,</p>
 
-<pre><code>Haruki Murakami, Kafka on the Shore, 25.17
-Charles Bukowski, Women: A Novel, 12.0
-Ivan Passer, Cutter's Way, n/a
-</code></pre>
-
-<p>Or you can check if book has a member "price" with the method <code>has_member</code>, and output accordingly,</p>
-
-<pre><code>if (book.has_member("price"))
+<pre><code>if (book.count("price") &gt; 0)
 {
     double price = book["price"].as&lt;double&gt;();
     std::cout &lt;&lt; price;
@@ -322,7 +332,7 @@ person["last_name"] = "Roe";
 person["events_attended"] = 10;
 person["accept_waiver_of_liability"] = true;
 
-for (auto it = person.begin_members(); it != person.end_members(); ++it)
+for (auto it = person.members().begin(); it != person.members().end(); ++it)
 {
     std::cout &lt;&lt; "name=" &lt;&lt; it-&gt;name() 
               &lt;&lt; ", value=" &lt;&lt; it-&gt;value().as&lt;std::string&gt;() &lt;&lt; std::endl;
@@ -337,7 +347,7 @@ cities.add("Toronto");
 cities.add("Ottawa");
 cities.add("Vancouver");
 
-for (auto it = cities.begin_elements(); it != cities.end_elements(); ++it)
+for (auto it = cities.elements().begin(); it != cities.elements().end(); ++it)
 {
     std::cout &lt;&lt; it-&gt;as&lt;std::string&gt;() &lt;&lt; std::endl;
 }
